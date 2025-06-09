@@ -1,12 +1,12 @@
 import os
 import numpy as np
-import torch
 from tqdm import tqdm
+
+import torch
 import torch.nn.functional as F
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, DataLoader
 
 from torch_geometric.data import Data
-from torch_geometric.utils import subgraph
 from torch_geometric.utils import to_undirected, to_networkx
 
 from .point_sampler import sample_queries
@@ -54,9 +54,9 @@ def grid_to_mesh(terrain, add_diag=True):
 
 
 class ShortestPathDataset(Dataset):
-    def __init__(self, path, terrain, samples, n_sources, add_diag=True, method = "random"):
+    def __init__(self, path, samples=None, n_sources=None, resolution=200, add_diag=True, method = "random"):
         if not os.path.exists(path):
-            self.construct_dataset(path, terrain, samples, n_sources, add_diag=True, method = method)
+            self.construct_dataset(path, samples, n_sources, resolution=resolution, add_diag=True, method = method)
         else:
             # load dataset
             dataset_dict = torch.load(path, weights_only=False)
@@ -67,7 +67,9 @@ class ShortestPathDataset(Dataset):
             self.nx_mesh = to_networkx(self.mesh, edge_attrs=['weight'], to_undirected=True)
             self.n_samples = len(self.sources)      
     
-    def construct_dataset(self, path, terrain, samples, n_sources, add_diag=True, method = "random"):
+    def construct_dataset(self, path, samples, n_sources, resolution=200, add_diag=True, method = "random"):
+        terrain = load_terrain_grid(res = resolution)
+        terrain /= 1000 # meters -> kilometers
         H, W = terrain.shape[:2]
         self.n_samples = samples
         self.mesh = grid_to_mesh(terrain, add_diag=add_diag)
@@ -84,6 +86,9 @@ class ShortestPathDataset(Dataset):
             self.targets += target
             self.distances += distance
         self.distances = torch.FloatTensor(self.distances)
+        self.sources = torch.LongTensor(self.sources)
+        self.targets = torch.LongTensor(self.targets)
+
         # save dataset
         dataset_dict = {
             "source": self.sources,
@@ -98,4 +103,25 @@ class ShortestPathDataset(Dataset):
     
     def __getitem__(self, index):
         src, tar, dist = self.sources[index], self.targets[index], self.distances[index]
-        return self.mesh.pos[src], self.mesh.pos[tar], dist
+        return src, tar, dist, self.mesh
+    
+def collate_function(batch):
+    src = torch.stack([inputs[0] for inputs in batch])
+    tar = torch.stack([inputs[1] for inputs in batch])
+    dist = torch.stack([inputs[2] for inputs in batch])
+    return src, tar, dist, batch[0][-1] # all graph are the same, just use any of them
+
+
+def build_dataloader(config, type="train"):
+    dataset = ShortestPathDataset(
+        path = getattr(config, f"{type}_path"),
+        samples = getattr(config, "samples", None),
+        n_sources = getattr(config, "n_sources", None),
+        resolution = getattr(config, "resolution", None),
+        method = getattr(config, "sampling_method", "random"),
+    )
+    dataloader = DataLoader(dataset, 
+                            batch_size=config.batch_size, 
+                            collate_fn=collate_function,
+                            shuffle= True if type == "train" else False)
+    return dataloader

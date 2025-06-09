@@ -13,6 +13,7 @@ def random_sampling(graph: nx.Graph, samples_per_source):
     distance = [distance[t] for t in target]
     return [src] * samples_per_source, target.tolist(), distance
 
+
 def distance_based(graph: nx.Graph, samples_per_source):
     src = np.random.randint(0, graph.number_of_nodes())
     distance = nx.single_source_dijkstra_path_length(graph, src)
@@ -25,9 +26,6 @@ def distance_based(graph: nx.Graph, samples_per_source):
     target = np.random.choice(vertices, (samples_per_source, ), p=probs, replace=False)
     distance = [distance[t] for t in target]
     return [src] * samples_per_source, target.tolist(), distance
-
-
-
 
 
 

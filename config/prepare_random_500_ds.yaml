@@ -1,0 +1,24 @@
+train_dataset:
+  type: train
+  train_path: /data/haoyun/shortest-path/norway_500x_random_train.pt
+  resolution: 500
+  samples: 50000
+  n_sources: 100
+  sampling_method: random
+  batch_size: 128
+valid_dataset:
+  type: valid
+  valid_path: /data/haoyun/shortest-path/norway_500x_random_valid.pt
+  resolution: 500
+  samples: 20000
+  n_sources: 50
+  sampling_method: random
+  batch_size: 128
+test_dataset:
+  type: test
+  test_path: /data/haoyun/shortest-path/norway_500x_random_test.pt
+  resolution: 500
+  samples: 20000
+  n_sources: 50
+  sampling_method: random
+  batch_size: 128
