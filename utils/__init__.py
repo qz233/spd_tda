@@ -1,1 +1,1 @@
-from .metric import Evaluator
+from .metric import Evaluator, average_multiple_run

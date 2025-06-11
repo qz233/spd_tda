@@ -13,7 +13,6 @@ class Trainer():
         self.epoches = config.epoch
         self.model = self.model.to(self.device)
         self.optim = torch.optim.AdamW(model.parameters(), lr=config.lr, weight_decay=1e-4)
-        self.scheduler = get_cosine_with_min_lr_schedule_with_warmup(self.optim, 100, self.epoches * len(self.train_dataloader), min_lr_rate=0.05)
         # checkpointing
         self.model_checkpoint = config.model_checkpoint
         self.save_path = os.path.join(config.model_checkpoint, config.run_name)
@@ -23,6 +22,7 @@ class Trainer():
 
     def train(self, ):
         self.train_loss = []
+        self.scheduler = get_cosine_with_min_lr_schedule_with_warmup(self.optim, 100, self.epoches * len(self.train_dataloader), min_lr_rate=0.05)
         best_acc = 0  
         for i in range(self.epoches):
             self.model.train()

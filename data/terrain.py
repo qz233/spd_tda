@@ -9,7 +9,7 @@ from torch.utils.data import Dataset, DataLoader
 from torch_geometric.data import Data
 from torch_geometric.utils import to_undirected, to_networkx
 
-from .point_sampler import sample_queries
+from .point_sampler import QuerySampler
 
 
 def load_terrain_grid(res=200, antialias="nearest"):
@@ -80,8 +80,9 @@ class ShortestPathDataset(Dataset):
         self.sources = []
         self.targets = []
         self.distances = []
+        query_sampler = QuerySampler(method, terrain)
         for i in tqdm(range(n_sources)):
-            source, target, distance = sample_queries(method, self.nx_mesh, samples_per_source)
+            source, target, distance = query_sampler.sample(self.nx_mesh, samples_per_source)
             self.sources += source
             self.targets += target
             self.distances += distance

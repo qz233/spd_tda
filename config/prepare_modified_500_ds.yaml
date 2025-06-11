@@ -1,0 +1,32 @@
+distance_ds:
+  type: train
+  train_path: /data/haoyun/shortest-path/norway_500x_distance_train.pt
+  resolution: 500
+  samples: 50000
+  n_sources: 100
+  sampling_method: distance
+  batch_size: 128
+critical_point_ds:
+  type: train
+  train_path: /data/haoyun/shortest-path/norway_500x_critical_train.pt
+  resolution: 500
+  samples: 50000
+  n_sources: 100
+  sampling_method: critical
+  batch_size: 128
+critical_distance_ds:
+  type: train
+  train_path: /data/haoyun/shortest-path/norway_500x_critical_distance_train.pt
+  resolution: 500
+  samples: 50000
+  n_sources: 100
+  sampling_method: critical_distance
+  batch_size: 128
+critical_mix_ds:
+  type: train
+  train_path: /data/haoyun/shortest-path/norway_500x_critical_mix_train.pt
+  resolution: 500
+  samples: 50000
+  n_sources: 100
+  sampling_method: critical_distance_mix
+  batch_size: 128

@@ -1,5 +1,5 @@
 device: cuda
-run_name: random-sample-mlp
+run_name: critical-mix-mlp
 
 # model params
 model_type: mlp
@@ -9,7 +9,7 @@ hidden_dim: 128
 output_dim: 64
 
 # dataset params
-train_path: /data/haoyun/shortest-path/norway_500x_random_train.pt
+train_path: /data/haoyun/shortest-path/norway_500x_critical_mix_train.pt
 valid_path: /data/haoyun/shortest-path/norway_500x_random_valid.pt
 test_path: /data/haoyun/shortest-path/norway_500x_random_test.pt
 

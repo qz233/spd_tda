@@ -1,12 +1,13 @@
 device: cuda
-run_name: random-sample-mlp
+run_name: random-sample-gat
 
 # model params
-model_type: mlp
+model_type: gnn
+gnn_kind: gat
 num_layers: 4
 input_dim: 3
 hidden_dim: 128
-output_dim: 64
+output_dim: 16
 
 # dataset params
 train_path: /data/haoyun/shortest-path/norway_500x_random_train.pt
@@ -14,8 +15,8 @@ valid_path: /data/haoyun/shortest-path/norway_500x_random_valid.pt
 test_path: /data/haoyun/shortest-path/norway_500x_random_test.pt
 
 # training params 
-lr: 1e-4
+lr: 1e-3
 epoch: 100
 batch_size: 256
 model_checkpoint: /data/haoyun/shortest-path/model_cache/
-num_train_runs: 5
+pretrain_path: /data/haoyun/shortest-path/model_cache/random-sample-gat/best.pt

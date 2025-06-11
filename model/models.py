@@ -58,7 +58,7 @@ class GNNLayer(nn.Module):
             self.conv = GINConv(nn.Sequential(nn.Linear(input_dim, output_dim), nn.BatchNorm1d(output_dim), nn.ReLU(), nn.Linear(output_dim, output_dim)))
         elif kind == "gat":
             self.conv = GATConv(input_dim, output_dim)
-        self.norm = nn.BatchNorm1d(input_dim)
+        self.norm = nn.BatchNorm1d(output_dim)
         self.dropout = nn.Dropout(dropout_rate)
 
     def forward(self, x, edge_index):
@@ -74,17 +74,45 @@ class GNN(nn.Module):
         super().__init__()
         assert num_layers >= 1
         self.layers = nn.ModuleList([GNNLayer(input_dim, hidden_dim, kind=kind, dropout_rate=dropout_rate)] + 
-                                    [GNNLayer(input_dim, hidden_dim, kind=kind, dropout_rate=dropout_rate) for _ in range(num_layers - 1)])
+                                    [GNNLayer(hidden_dim, hidden_dim, kind=kind, dropout_rate=dropout_rate) for _ in range(num_layers - 1)])
         self.out_proj = nn.Linear(hidden_dim, output_dim)
 
-    def forward(self, inputs):
-        x, edge_index = inputs.x, inputs.edge_index
-        for layer in self.layers:
-            x = layer(x, edge_index)
+    def forward(self, x, edge_index):
+        x = self.layers[0](x, edge_index)
+        for layer in self.layers[1:]:
+            x = x + layer(x, edge_index)
         return self.out_proj(x)
+
+
+class GNNShortestPath(nn.Module):
+    def __init__(self, config):
+        super().__init__()
+        self.backbone = GNN(kind=config.gnn_kind,
+                            input_dim=config.input_dim, 
+                            output_dim=config.output_dim, 
+                            hidden_dim=config.hidden_dim, 
+                            num_layers=config.num_layers,
+                            dropout_rate=getattr(config, "dropout_rate", 0.2))
+        
+    def forward(self, batch):
+        # return loss
+        pred = self.predict(batch)
+        loss = F.mse_loss(pred, batch[2])
+        return loss
+
+    def predict(self, batch):   
+        src, tar, graph = batch[0], batch[1], batch[3]
+        graph_emb = self.backbone(graph.pos, graph.edge_index)
+        src_emb = graph_emb[src]
+        tar_emb = graph_emb[tar]
+        pred = torch.norm(src_emb - tar_emb, p=1, dim=-1)
+        return pred 
+
 
 def build_model(config):
     if config.model_type == "mlp":
         return MLPShortestPath(config)
+    elif config.model_type == "gnn":
+        return GNNShortestPath(config)
     else:
         raise NotImplementedError(f"{config.model_type} not defined.")
