@@ -33,6 +33,8 @@ result averaged over 5 runs.
 | mlp, random sample| $0.828 \pm 0.018 \%$ | $91.55 \pm 0.31$|
 | mlp, distance-based sample| $0.826 \pm 0.027 \%$ | $92.29 \pm 0.26$|
 | mlp, critical points-based sample| $0.873 \pm 0.024 \%$ | $90.72 \pm 0.33$|
+| mlp, critical + distance sample| $0.847 \pm 0.038\%$ | $91.72 \pm 0.42$|
+| mlp, critical mixed sample| $0.794 \pm 0.025\%$ | $92.41 \pm 0.26$|
 
 
 ### Run GAT
@@ -48,10 +50,3 @@ python run.py --test --config ./config/random_sample_gat.yaml
 result relative error: 1.42%, acc: 77.06, after 100 epoch(~1h)
 
 Remark: Maybe we are justified to use mlp on this task. It is way much fast (10x~50x) than gnn, raise comparible result (as in the paper) within much less epoches. 
-
-distance
-final result: {'relative_error_mean': np.float64(0.008467662520706654), 'relative_error_std': np.float64(0.00037605989447013244), 'acc_mean': np.float64(0.9172499775886536), 'acc_std': np.float64(0.004179589769150813)}
-
-
-mix
-final result: {'relative_error_mean': np.float64(0.00794494803994894), 'relative_error_std': np.float64(0.00024647742024262346), 'acc_mean': np.float64(0.9240899801254272), 'acc_std': np.float64(0.0025778738280623735)}
